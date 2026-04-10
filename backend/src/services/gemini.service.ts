@@ -48,7 +48,7 @@ export const generateResumeBullets = async (role: string, jdText: string) => {
   // Convert bullet points text into an array
   return text.split('\n').filter(line => line.trim().length > 0).map(line => line.replace(/^[*-]\s*/, '').trim());
 };
-
+// 2.5 flash model not 1.5
 export const generateResumeBulletsStream = async (role: string, jdText: string) => {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
  
