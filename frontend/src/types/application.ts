@@ -30,4 +30,5 @@ export interface GeminiParsedJD {
   niceToHaveSkills: string[];
   seniority: string;
   location: string;
+  jdLink?: string;
 }

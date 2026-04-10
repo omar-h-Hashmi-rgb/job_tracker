@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+const getSecret = () => process.env.JWT_SECRET || 'fallback_secret';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -28,7 +28,7 @@ export const register = async (req: Request, res: Response) => {
     await newUser.save();
 
     // Generate JWT
-    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, {
+    const token = jwt.sign({ userId: newUser._id }, getSecret(), {
       expiresIn: '7d',
     });
 
@@ -62,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Generate JWT
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id }, getSecret(), {
       expiresIn: '7d',
     });
 

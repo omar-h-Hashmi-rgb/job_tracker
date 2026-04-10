@@ -22,6 +22,25 @@ api.interceptors.request.use(
   }
 );
 
+// Response interceptor for handling 401s
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // Only redirect if not already on the login page to avoid loops
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Applications
 export const getApplications = () => api.get<IApplication[]>('/applications');
 export const createApplication = (data: ApplicationFormData) => api.post<IApplication>('/applications', data);

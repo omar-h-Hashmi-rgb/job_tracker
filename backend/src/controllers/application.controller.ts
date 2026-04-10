@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import Application from '../models/Application.js';
-import * as geminiService from '../services/gemini.service.js';
+import * as groqService from '../services/groq.service.js';
 
 export const getApplications = async (req: Request, res: Response) => {
   try {
@@ -87,8 +87,14 @@ export const parseJD = async (req: Request, res: Response) => {
     }
 
     const [parsedData, resumeBullets] = await Promise.all([
-      geminiService.parseJobDescription(jdText),
-      geminiService.generateResumeBullets('', jdText),
+      groqService.parseJobDescription(jdText),
+      groqService.generateResumeBulletsStream(req.body.role || 'Position', jdText).then(async (stream) => {
+        let bullets = '';
+        for await (const chunk of stream) {
+          bullets += chunk.choices[0]?.delta?.content || '';
+        }
+        return bullets.split('\n').filter(b => b.trim()).map(b => b.replace(/^[*-]\s*/, '').trim());
+      }),
     ]);
 
     res.status(200).json({
@@ -114,11 +120,13 @@ export const streamBullets = async (req: Request, res: Response) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    const result = await geminiService.generateResumeBulletsStream(role || 'Position', jdText);
-
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+    const stream = await groqService.generateResumeBulletsStream(role || 'Position', jdText);
+    
+    for await (const chunk of stream) {
+      const chunkText = chunk.choices[0]?.delta?.content || '';
+      if (chunkText) {
+        res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+      }
     }
 
     res.write('data: [DONE]\n\n');

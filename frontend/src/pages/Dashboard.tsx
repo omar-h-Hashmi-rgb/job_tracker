@@ -9,25 +9,11 @@ import toast from 'react-hot-toast';
 import type { IApplication } from '../types/application';
 
 const Dashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isDarkMode, toggleDarkMode } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark' || 
-      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  });
   const [applications, setApplications] = useState<IApplication[]>([]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
 
   const fetchApps = async () => {
     try {
@@ -82,7 +68,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300">
       {/* Navigation */}
-      <nav className="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-10 transition-colors">
+      <nav className="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-20 transition-colors">
         <div className="flex items-center gap-2">
           <div className="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-200 dark:shadow-none">
             <Layout className="text-white" size={20} />
@@ -92,7 +78,7 @@ const Dashboard: React.FC = () => {
         
         <div className="flex items-center gap-3 sm:gap-6">
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleDarkMode}
             className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors bg-gray-50 dark:bg-gray-800 rounded-full"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
