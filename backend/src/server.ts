@@ -2,6 +2,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import dns from 'node:dns';
+
+// Force Node.js to use Google DNS for this process to bypass SRV resolution errors
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 import authRoutes from './routes/auth.routes.js';
 import applicationRoutes from './routes/application.routes.js';
 
