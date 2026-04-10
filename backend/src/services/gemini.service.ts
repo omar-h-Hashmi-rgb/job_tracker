@@ -51,7 +51,7 @@ export const generateResumeBullets = async (role: string, jdText: string) => {
 
 export const generateResumeBulletsStream = async (role: string, jdText: string) => {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
+ 
   const prompt = `
     Based on the following job description for a ${role} position, generate 3 to 5 highly specific, tailored resume bullet points.
     Focus on impact, numbers, and the specific keywords found in the JD.
