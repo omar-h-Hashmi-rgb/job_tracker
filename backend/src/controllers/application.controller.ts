@@ -40,6 +40,9 @@ export const createApplication = async (req: Request, res: Response) => {
 export const updateApplication = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    console.log(`[Update] Attempting to update application ${id} for user ${req.userId}`);
+    console.log(`[Update] Payload:`, req.body);
+
     if (!id) {
       return res.status(400).json({ message: 'Bad Request: Application ID is required' });
     }
@@ -51,13 +54,15 @@ export const updateApplication = async (req: Request, res: Response) => {
     );
 
     if (!updatedApplication) {
+      console.warn(`[Update] Application ${id} not found or unauthorized for user ${req.userId}`);
       return res.status(404).json({ message: 'Application Not Found' });
     }
 
+    console.log(`[Update] Successfully updated application ${id}`);
     res.status(200).json(updatedApplication);
   } catch (error: unknown) {
     const err = error as Error;
-    console.error('updateApplication error:', err);
+    console.error('[Update] Error:', err);
     res.status(500).json({ message: 'Failed to update application', error: err.message });
   }
 };

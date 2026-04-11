@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -14,7 +14,6 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
 import ApplicationCard from './ApplicationCard';
 import ApplicationDetailModal from './ApplicationDetailModal';
-import { getApplications, updateApplication } from '../services/api';
 import { Ghost, Sparkles } from 'lucide-react';
 import type { IApplication, ApplicationStatus } from '../types/application';
 
@@ -27,14 +26,15 @@ const COLUMNS = [
 ];
 
 interface KanbanBoardProps {
+  applications: IApplication[];
   searchQuery: string;
-  onAppsFetched?: (apps: IApplication[]) => void;
+  isLoading: boolean;
+  onUpdate: (id: string, newStatus: string) => Promise<void>;
+  onAppsFetched: () => void;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, onAppsFetched }) => {
-  const [applications, setApplications] = useState<IApplication[]>([]);
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ applications, searchQuery, isLoading, onUpdate, onAppsFetched }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<IApplication | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -49,82 +49,43 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, onAppsFetched })
     })
   );
 
-  const fetchApps = async () => {
-    try {
-      const response = await getApplications();
-      setApplications(response.data);
-      if (onAppsFetched) onAppsFetched(response.data);
-    } catch (error) {
-      console.error('Failed to fetch applications', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchApps();
-  }, []);
-
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
+    const { over } = event;
     if (!over) return;
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    if (activeId === overId) return;
-
-    const isActiveInColumn = COLUMNS.some((col) => col.id === overId);
     
-    if (isActiveInColumn) {
-      setApplications((prev) => {
-        const activeApp = prev.find((app) => app._id === activeId);
-        if (activeApp && activeApp.status !== (overId as string)) {
-          return prev.map((app) =>
-            app._id === activeId ? { ...app, status: overId as ApplicationStatus } : app
-          );
-        }
-        return prev;
-      });
-    }
+    // We only update locally for smooth animation during hover (Dnd-kit internal)
+    // The final source of truth remains the parent's applications prop
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
-
     if (!over) return;
 
     const activeApp = applications.find((app) => app._id === active.id);
     if (!activeApp) return;
 
-    const overColumn = COLUMNS.find(c => c.id === over.id) || 
-                       COLUMNS.find(c => c.id === (over.data.current?.sortable?.containerId));
+    // Resolve target status: check if over.id is a column or if we dropped on a card in a column
+    let finalStatus = activeApp.status;
     
-    const finalStatus = overColumn ? overColumn.id : activeApp.status;
+    // 1. Check if dropped directly on a column container
+    const isColumn = COLUMNS.some(col => col.id === over.id);
+    if (isColumn) {
+      finalStatus = over.id as ApplicationStatus;
+    } else {
+      // 2. Check if dropped on a card within a column
+      const overApp = applications.find(app => app._id === over.id);
+      if (overApp) {
+        finalStatus = overApp.status;
+      }
+    }
 
     if (activeApp.status !== finalStatus) {
-      // Optimistic update
-      setApplications(prev => prev.map(app => 
-        app._id === activeApp._id ? { ...app, status: finalStatus } : app
-      ));
-
-      try {
-        await updateApplication(activeApp._id, { status: finalStatus });
-        if (onAppsFetched) {
-          const updatedApps = applications.map(app => 
-            app._id === activeApp._id ? { ...app, status: finalStatus } : app
-          );
-          onAppsFetched(updatedApps);
-        }
-      } catch (error) {
-        console.error('Failed to update application status', error);
-        fetchApps(); // Rollback
-      }
+      await onUpdate(activeApp._id, finalStatus);
     }
   };
 
@@ -138,7 +99,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, onAppsFetched })
     setIsDetailModalOpen(true);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-24 bg-gray-50/50 dark:bg-gray-900/50 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
         <div className="relative">
@@ -208,7 +169,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ searchQuery, onAppsFetched })
         application={selectedApp}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        onUpdate={() => fetchApps()}
+        onUpdate={onAppsFetched}
       />
     </>
   );

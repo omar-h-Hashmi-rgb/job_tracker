@@ -4,32 +4,51 @@ import KanbanBoard from '../components/KanbanBoard';
 import AddApplicationModal from '../components/AddApplicationModal';
 import DashboardStats from '../components/DashboardStats';
 import { Plus, LogOut, Layout, Search, Moon, Sun, Download } from 'lucide-react';
-import { getApplications } from '../services/api';
+import { getApplications, updateApplication as apiUpdateApplication } from '../services/api';
 import toast from 'react-hot-toast';
 import type { IApplication } from '../types/application';
 
 const Dashboard: React.FC = () => {
   const { user, logout, isDarkMode, toggleDarkMode } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [applications, setApplications] = useState<IApplication[]>([]);
 
   const fetchApps = async () => {
     try {
+      setIsLoading(true);
       const response = await getApplications();
       setApplications(response.data);
     } catch (error) {
       console.error('Failed to fetch applications', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchApps();
-  }, [refreshKey]);
+  }, []);
 
   const handleSuccess = () => {
-    setRefreshKey(prev => prev + 1);
+    fetchApps();
+  };
+
+  const updateAppStatus = async (id: string, newStatus: string) => {
+    try {
+      // Optimistic update
+      const updatedApps = applications.map(app => 
+        app._id === id ? { ...app, status: newStatus as any } : app
+      );
+      setApplications(updatedApps);
+
+      await apiUpdateApplication(id, { status: newStatus });
+    } catch (error) {
+      console.error('Failed to update application status', error);
+      toast.error('Failed to sync changes with server');
+      fetchApps(); // Rollback
+    }
   };
 
   const exportToCSV = () => {
@@ -144,9 +163,11 @@ const Dashboard: React.FC = () => {
         {/* Kanban Board */}
         <div className="bg-transparent">
           <KanbanBoard 
-            key={refreshKey} 
+            applications={applications}
             searchQuery={searchQuery} 
-            onAppsFetched={(apps) => setApplications(apps)}
+            isLoading={isLoading}
+            onUpdate={updateAppStatus}
+            onAppsFetched={fetchApps}
           />
         </div>
       </div>

@@ -19,24 +19,24 @@ const DashboardStats: React.FC<StatsProps> = ({ applications }) => {
       label: 'Interviews',
       value: applications.filter(app => app.status === 'Interview' || app.status === 'Phone Screen').length,
       icon: MessageSquare,
-      color: 'bg-purple-500',
-      textColor: 'text-purple-600',
+      color: 'bg-indigo-500',
+      textColor: 'text-indigo-600',
     },
     {
       label: 'Offers',
       value: applications.filter(app => app.status === 'Offer').length,
       icon: CheckCircle,
-      color: 'bg-green-500',
-      textColor: 'text-green-600',
+      color: 'bg-emerald-500',
+      textColor: 'text-emerald-600',
     },
     {
       label: 'Success Rate',
       value: applications.length > 0 
-        ? `${Math.round((applications.filter(app => app.status === 'Offer').length / applications.length) * 100)}%` 
+        ? `${Math.round((applications.filter(app => ['Offer', 'Interview', 'Phone Screen'].includes(app.status)).length / applications.length) * 100)}%` 
         : '0%',
       icon: TrendingUp,
-      color: 'bg-orange-500',
-      textColor: 'text-orange-600',
+      color: 'bg-amber-500',
+      textColor: 'text-amber-600',
     },
   ];
 
