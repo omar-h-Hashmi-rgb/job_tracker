@@ -119,7 +119,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ applications, searchQuery, is
         </div>
         <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">Your pipeline is empty</h2>
         <p className="text-gray-500 dark:text-gray-400 max-w-sm font-medium mb-8">
-          Don't wait for the right time. Start tracking your applications and use Gemini AI to give you a competitive edge.
+          Don't wait for the right time. Start tracking your applications and use AI to give you a competitive edge.
         </p>
       </div>
     );

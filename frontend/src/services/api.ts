@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
-import type { IApplication, ApplicationFormData, GeminiParsedJD } from '../types/application';
+import type { IApplication, ApplicationFormData, AIParsedJD } from '../types/application';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -48,6 +48,6 @@ export const updateApplication = (id: string, data: Partial<ApplicationFormData>
 export const deleteApplication = (id: string) => api.delete(`/applications/${id}`);
 
 // AI
-export const parseJobDescription = (jdText: string) => api.post<{ parsedData: GeminiParsedJD }>('/applications/parse', { jdText });
+export const parseJobDescription = (jdText: string) => api.post<{ parsedData: AIParsedJD }>('/applications/parse', { jdText });
 
 export default api;

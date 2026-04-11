@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
           <div className="flex-1 w-full">
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">Active Pipeline</h1>
             <p className="text-gray-500 dark:text-gray-400 max-w-lg font-medium">
-              Manage your future. Use Gemini AI to optimize your strategy and track every milestone.
+              Manage your future. Use AI to optimize your strategy and track every milestone.
             </p>
           </div>
           

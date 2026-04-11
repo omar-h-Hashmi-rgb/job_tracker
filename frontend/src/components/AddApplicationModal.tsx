@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Sparkles, Copy, Check } from 'lucide-react';
 import { parseJobDescription, createApplication } from '../services/api';
 import toast from 'react-hot-toast';
-import type { ApplicationFormData, GeminiParsedJD } from '../types/application';
+import type { ApplicationFormData, AIParsedJD } from '../types/application';
 
 interface AddApplicationModalProps {
   isOpen: boolean;
@@ -34,14 +34,15 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({ isOpen, onClo
     try {
       // 1. Standard JSON Parse for details
       const response = await parseJobDescription(jdText);
-      const parsedData = response.data.parsedData as GeminiParsedJD;
+      const parsedData = response.data.parsedData as AIParsedJD;
       
-      setFormData({
-        ...formData,
-        company: parsedData.companyName || '',
-        role: parsedData.role || '',
-        jdLink: parsedData.jdLink || formData.jdLink,
-      });
+      setFormData(prev => ({
+        ...prev,
+        company: parsedData.companyName || prev.company,
+        role: parsedData.role || prev.role,
+        jdLink: parsedData.jdLink || prev.jdLink,
+        salaryRange: parsedData.salaryRange || prev.salaryRange,
+      }));
       setFormData(prev => ({ 
         ...prev, 
         notes: `Required Skills: ${parsedData.requiredSkills?.join(', ')}\n\nLocation: ${parsedData.location}` 
@@ -146,7 +147,7 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({ isOpen, onClo
         <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Add New Application</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Track your next career move with Gemini AI insights.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Track your next career move with AI insights.</p>
           </div>
           <button 
             onClick={onClose} 
@@ -182,7 +183,7 @@ const AddApplicationModal: React.FC<AddApplicationModalProps> = ({ isOpen, onClo
                 {isParsing ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Analyzing with Gemini...</span>
+                    <span>Analyzing with AI...</span>
                   </>
                 ) : (
                   <>

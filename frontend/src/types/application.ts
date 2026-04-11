@@ -23,12 +23,11 @@ export interface ApplicationFormData {
   notes?: string;
 }
 
-export interface GeminiParsedJD {
+export interface AIParsedJD {
   companyName: string;
   role: string;
   requiredSkills: string[];
-  niceToHaveSkills: string[];
-  seniority: string;
   location: string;
   jdLink?: string;
+  salaryRange?: string;
 }

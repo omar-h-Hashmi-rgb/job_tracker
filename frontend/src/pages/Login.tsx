@@ -128,7 +128,7 @@ const Login: React.FC = () => {
 
         {/* Footer Meta */}
         <div className="text-center mt-8 space-y-2">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Powered by Gemini 1.5 Flash</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Powered by AI</p>
           <p className="text-[10px] text-gray-300 dark:text-gray-600">Secure AES-256 Auth Encryption</p>
         </div>
       </div>

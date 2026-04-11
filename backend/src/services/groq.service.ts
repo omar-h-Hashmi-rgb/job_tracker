@@ -13,11 +13,12 @@ export const parseJobDescription = async (jdText: string) => {
       {
         role: 'system',
         content: 'You are an expert recruitment assistant. Extract job details from the provided text and return ONLY a valid JSON object. ' +
-                 'Fields: companyName (string), role (string), requiredSkills (array of strings), location (string), jdLink (string). ' +
+                 'Fields: companyName (string), role (string), requiredSkills (array of strings), location (string), jdLink (string), salaryRange (string). ' +
                  'Special Instructions: \n' +
                  '1. If a URL is present in the text, extract it into the "jdLink" field.\n' +
-                 '2. If the text is very sparse (e.g. just a link), infer the company name from the website domain (e.g., careers.google.com -> Google).\n' +
-                 '3. If a field is missing and cannot be inferred, use an empty string or empty array.'
+                 '2. If the text is very sparse (e.g. just a link), infer the company name from the website domain.\n' +
+                 '3. Extract any mentioned salary or compensation into "salaryRange".\n' +
+                 '4. If a field is missing, use an empty string or empty array.'
       },
       {
         role: 'user',
